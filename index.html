@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+canvas#myCanvas {
+  background-color: lightgreen;
+  border: 2px solid black;
+}
+
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="700" height="400">Your browser does not support JS Canvas</canvas>
+<button onclick="playGame()">Play Game</button>
+    <script>const canvas = document.getElementById("myCanvas");
+// initalize the context
+let ctx = canvas.getContext("2d");
+const CW = canvas.width;
+const CH = canvas.height;
+const halfCW = CW / 2;
+const halfCH = CH / 2;
+
+let ballIconSrc = "https://cdn-icons-png.flaticon.com/512/53/53283.png";
+let netIconSrc = "https://cdn-icons-png.flaticon.com/512/53/53283.png";
+let ballImage = new Image();
+ballImage.crossOrigin = "anonymous";
+ballImage.src = ballIconSrc;
+
+("https://png.pngtree.com/png-vector/20220719/ourmid/pngtree-color-icon---football-goal-post-game-icon-penalty-vector-png-image_37947066.png");
+
+let ballW = 20;
+let ballH = 20;
+
+let ballX = CW / 2 - ballW / 2;
+let ballY = CH / 2 - ballH / 2;
+
+let ballSpeedX = 2;
+let ballSpeedY = 2;
+
+function drawRect(x, y, w, h) {
+  ctx.fillRect(x, y, w, h);
+}
+// invoke the function
+function drawBall() {
+  ctx.drawImage(ballImage, ballX, ballY, ballW, ballH);
+}
+
+drawBall();
+let paddleW = 100;
+let paddleH = 20;
+let paddleX = CW / 2 - paddleW / 2;
+let paddleY = CH - paddleH - 20;
+function drawPaddle() {
+  drawRect(paddleX, paddleY, paddleW, paddleH);
+}
+drawPaddle();
+
+let netW = 120;
+let netH = 30;
+let netX = CW / 2 - netW / 2;
+let netY = CH / 2 - 200;
+function drawNet() {
+  drawRect(netX, netY, netW, netH);
+}
+drawNet();
+
+function paddleCollision() {
+  if (
+    // first
+    ballX < paddleX + paddleW &&
+    // second
+    ballX + ballW > paddleX &&
+    // third
+    ballY < paddleY + paddleH &&
+    // fourth
+    ballY + ballH > paddleY
+  ) {
+    return true;
+  }
+}
+
+function netCollision() {
+  if (
+    // first
+    ballX < netX + netW &&
+    // second
+    ballX + ballW > netX &&
+    // third
+    ballY < netY + netH &&
+    // fourth
+    ballY + ballH > netY
+  ) {
+    return true;
+  }
+}
+
+let moveUp = false;
+let moveDown = false;
+let moveRight = false;
+let moveLeft = false;
+document.addEventListener("keydown", function (event) {
+  if (event.key === "ArrowRight") {
+    moveRight = true;
+    // paddleX += 10;
+  }
+  if (event.key === "ArrowLeft") {
+    moveLeft = true;
+    // paddleX -= 10;
+  }
+});
+document.addEventListener("keyup", function (event) {
+  if (event.key === "ArrowRight") {
+    moveRight = false;
+    // paddleX += 10;
+  }
+  if (event.key === "ArrowLeft") {
+    moveLeft = false;
+    // paddleX -= 10;
+  }
+});
+
+let bounces = 0;
+let score = 0;
+let fails = 0;
+
+function playGame() {
+  ctx.clearRect(0, 0, CW, CH);
+  ballX += ballSpeedX;
+  ballY += ballSpeedY;
+
+  if (ballX + ballW > CW || ballX < 0) {
+    ballSpeedX *= -1;
+  }
+  if (ballY + ballH < 0) {
+    ballSpeedY *= -1;
+  }
+  if (ballY + ballH > CH) {
+    fails++;
+    console.log("fail. Number of falls: " + fails);
+
+    ballY = CH / 2;
+    ballX = CW / 2;
+  }
+
+  if (paddleCollision()) {
+    console.log("collision!");
+    bounces++;
+    console.log(bounces);
+    ballSpeedX *= -1;
+    ballSpeedY *= -1;
+  }
+
+  if (netCollision()) {
+    bounces++;
+    ballSpeedX *= -1;
+    ballSpeedY *= -1;
+  }
+
+  if (moveRight && paddleX + paddleW < CW) {
+    paddleX += 10;
+  }
+  if (moveLeft && paddleX > 0) {
+    paddleX -= 10;
+  }
+  drawBall();
+  drawPaddle();
+  drawHud();
+  drawNet();
+
+  // count++; // increment by 1
+  // console.log(count);
+
+  // call the recursive loop
+  // recursive means continue forever
+  requestAnimationFrame(playGame);
+}
+function drawHud() {
+  ctx.font = "12px Arial";
+  ctx.fillText("Bounces: " + bounces + " fails: " + fails, 50, 50);
+}
+drawHud();
+// playGame();
+</script>
+</body>
+</html>
